@@ -1,0 +1,7 @@
+---
+# vars file for aks-ansible
+cluster_name: "my-k8s-cluster"
+loc: "eastus"
+cid: "2a06b565-8eab-4497-ae68-433cee3eabce"
+csec: "e0pyj41ie_bZ4UmPbNtWH_nV~__03f20DB"
+rg: "testing-resource-grp"

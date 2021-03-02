@@ -1,0 +1,48 @@
+---
+# tasks file for aks-ansible
+
+- name: Creating a resource group
+  azure_rm_resourcegroup:
+    name: testing-resource-grp
+    location: "{{ loc }}"
+    tags:
+      testing: testing
+      delete: never
+  register: rg
+
+- name: debugging
+  debug:
+    var: rg.state.name
+
+- name: creating ssh key
+  command: "ssh-keygen -f ssh-aks"
+
+- name: pub key
+  command: "cat ssh-aks.pub"
+  register: key
+
+- name: debugging
+  debug:
+    var: key.stdout
+
+- name: Create an AKS instance
+  azure_rm_aks:
+    name: "{{ cluster_name }}"
+    resource_group: "{{ rg.state.name }}"
+    location: "{{ loc }}"
+    dns_prefix: akstest
+    kubernetes_version: 1.19.7
+    linux_profile:
+      admin_username: k8s-user
+      ssh_key: "{{ key.stdout }}"
+    service_principal:
+      client_id: "{{ cid }}"
+      client_secret: "{{ csec }}"
+    agent_pool_profiles:
+    - name: default
+      count: 2
+      vm_size: Standard_D2_v2
+    tags:
+      Environment: Testing
+
+
