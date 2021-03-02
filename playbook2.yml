@@ -1,0 +1,41 @@
+- hosts: localhost
+
+  vars_files: 
+    - var.yml
+  
+  tasks:
+  - name: Configuring Yum repo for k8s
+    yum_repository:
+      name: kubernetes
+      description: Yum for k8s
+      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+      enabled: yes
+      gpgcheck: yes
+      repo_gpgcheck: yes
+      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+  - name: installation of kubectl
+    package:
+      name: "kubectl"
+      state: present
+
+  - name: getting cluster list
+    command: "az aks list"
+    register: list
+
+  - name: debugging
+    debug:
+      var: list
+
+  - name: aks local setup
+    command: "az aks get-credentials --name {{ cluster_name }}  --resource-group {{ rg }}"
+
+  - name: storing secret file
+    command: "kubectl apply -f multi-tier/secret.yml"
+
+  - name: creating wordpress deployment
+    command: "kubectl create -f multi-tier/wordpress.yml"
+
+  - name: creating mysql deployment
+    command: "kubectl create -f multi-tier/mysql.yml"
+
